@@ -19,6 +19,9 @@ public class NormalBroadcaster extends Broadcaster {
     public byte[] getBroadcastPacket() throws SocketException, UnknownHostException {
         NetworkInterface network = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
         byte[] mac = network.getHardwareAddress();
+        if (mac == null) {
+            throw new UnknownHostException("Cannot find network interface");
+        }
         assert mac.length == 6;
         byte[] host = HOSTNAME.getBytes(StandardCharsets.UTF_8);
         ByteBuffer header = ByteBuffer.allocate(7 + host.length);
@@ -32,7 +35,7 @@ public class NormalBroadcaster extends Broadcaster {
         long timestamp = System.currentTimeMillis() / 1000;
         //toSend.putInt((int) (timestamp << 32 >> 32));
         //toSend.putInt((int) (timestamp >> 32));
-        toSend.putLong(timestamp);
+        toSend.putInt((int) timestamp);
         return toSend.array();
     }
 }

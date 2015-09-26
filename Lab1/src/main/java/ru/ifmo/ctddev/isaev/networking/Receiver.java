@@ -20,7 +20,7 @@ public class Receiver implements Runnable {
             DatagramSocket socket = new DatagramSocket(PORT);
             while (true) {
                 try {
-                    DatagramPacket packet = new DatagramPacket(new byte[PACKET_LENGTH], PACKET_LENGTH);
+                    DatagramPacket packet = new DatagramPacket(new byte[1000], 1000);
                     socket.receive(packet);
                     System.out.println("Received new message: ");
                     Message message = parseRelative(packet.getData());
@@ -82,11 +82,11 @@ public class Receiver implements Runnable {
         buffer = buffer.get(hostname);
         message.hostname = new String(hostname, StandardCharsets.UTF_8);
         System.out.println("Hostname is: " + message.hostname);
-        if (buffer.remaining() < 8) {
+        if (buffer.remaining() < 4) {
             message.ok = false;
             return message;
         }
-        message.timestamp = buffer.getLong();
+        message.timestamp = buffer.getInt();
         message.ok = true;
         return message;
     }

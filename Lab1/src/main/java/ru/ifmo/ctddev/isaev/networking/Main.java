@@ -35,7 +35,7 @@ public class Main {
             SLEEP_TIME = Integer.parseInt(args[2]);
         }
         HOSTNAME = args[0];
-        PACKET_LENGTH = 6 + HOSTNAME.getBytes().length + 1 + 8;
+        PACKET_LENGTH = 6 + HOSTNAME.getBytes().length + 1 + 4;
         if (args.length > 3 && args[3].equals("MAD")) {
             executor.execute(new MadBroadcaster());
         }

@@ -60,7 +60,7 @@ public class Printer implements Runnable {
             data[k][1] = info.hostname;
             data[k][2] = new Timestamp(info.lastTimestamp * 1000)
                     .toLocalDateTime()
-                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss.SSS"));
+                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss.SSS"));
             data[k][3] = info.skippedAnnounces;
             ++k;
         }

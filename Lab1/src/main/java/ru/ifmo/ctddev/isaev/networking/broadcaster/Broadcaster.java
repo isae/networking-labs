@@ -2,7 +2,11 @@ package ru.ifmo.ctddev.isaev.networking.broadcaster;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
+import static ru.ifmo.ctddev.isaev.networking.Main.PORT;
 import static ru.ifmo.ctddev.isaev.networking.Main.SLEEP_TIME;
 
 /**
@@ -10,19 +14,24 @@ import static ru.ifmo.ctddev.isaev.networking.Main.SLEEP_TIME;
  */
 public abstract class Broadcaster implements Runnable {
 
-    public static InetAddress getBroadcastAddress(NetworkInterface network) throws SocketException {
-        for (InterfaceAddress interfaceAddress :
-                network.getInterfaceAddresses()) {
-            InetAddress broadcast = interfaceAddress.getBroadcast();
-            if (broadcast != null) {
-                return broadcast;
+    public static List<InetAddress> getBroadcastAddress() throws SocketException {
+        Enumeration<NetworkInterface> intefaces = NetworkInterface.getNetworkInterfaces();
+        List<InetAddress> adresses = new ArrayList<>();
+        while (intefaces.hasMoreElements()) {
+            NetworkInterface network = intefaces.nextElement();
+            for (InterfaceAddress interfaceAddress :
+                    network.getInterfaceAddresses()) {
+                InetAddress broadcast = interfaceAddress.getBroadcast();
+                if (broadcast != null) {
+                    adresses.add(broadcast);
+                }
             }
         }
-        return null;
+        return adresses;
     }
 
 
-    public abstract DatagramPacket getBroadcastPacket() throws SocketException, UnknownHostException;
+    public abstract byte[] getBroadcastPacket() throws SocketException, UnknownHostException;
 
     @Override
     public void run() {
@@ -31,9 +40,14 @@ public abstract class Broadcaster implements Runnable {
             socket.setBroadcast(true);
             while (true) {
                 try {
-                    socket.send(getBroadcastPacket());
+                    byte[] bytes = getBroadcastPacket();
+                    for (InetAddress broadcastAddress : getBroadcastAddress()) {
+                        DatagramPacket packet = new DatagramPacket(bytes,
+                                bytes.length, broadcastAddress, PORT);
+                        socket.send(packet);
+                    }
                     Thread.sleep(SLEEP_TIME);
-                } catch (IOException e) {
+                } catch (IOException | RuntimeException e) {
                     e.printStackTrace();
                 }
             }

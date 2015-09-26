@@ -25,7 +25,7 @@ public class Receiver implements Runnable {
                     System.out.println("Received new message: ");
                     Message message = parseRelative(packet.getData());
                     if (!message.ok) {
-                        System.out.println("Received bad packet");
+                        System.err.println("Received bad packet");
                         continue;
                     }
                     message.printAsTable();
@@ -40,7 +40,7 @@ public class Receiver implements Runnable {
                         }
                     }
                 } catch (IOException e) {
-                    System.out.println("Received bad packet");
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {

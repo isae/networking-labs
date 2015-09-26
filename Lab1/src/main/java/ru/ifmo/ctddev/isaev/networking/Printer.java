@@ -2,6 +2,8 @@ package ru.ifmo.ctddev.isaev.networking;
 
 import dnl.utils.text.table.TextTable;
 
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,7 +15,7 @@ import static ru.ifmo.ctddev.isaev.networking.Main.*;
 public class Printer implements Runnable {
     public static final String[] columnNames = {
             "MAC address",
-            "Hostname", "Last timestamp"};
+            "Hostname", "Last time", "Skipped packets"};
 
     @Override
     public void run() {
@@ -51,12 +53,15 @@ public class Printer implements Runnable {
     private void printBroadcasters() {
 
         System.out.println("Current broadcasters: ");
-        Object[][] data = new Object[broadcasters.values().size()][3];
+        Object[][] data = new Object[broadcasters.values().size()][4];
         int k = 0;
         for (BroadcasterInfo info : broadcasters.values()) {
             data[k][0] = info.mac;
             data[k][1] = info.hostname;
-            data[k][2] = info.lastTimestamp;
+            data[k][2] = new Timestamp(info.lastTimestamp * 1000)
+                    .toLocalDateTime()
+                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss.SSS"));
+            data[k][3] = info.skippedAnnounces;
             ++k;
         }
         TextTable tt = new TextTable(columnNames, data);

@@ -1,25 +1,28 @@
 package ru.ifmo.ctddev.isaev.networking.broadcaster;
 
-import java.net.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
-import static ru.ifmo.ctddev.isaev.networking.Main.*;
+import static ru.ifmo.ctddev.isaev.networking.Main.HOSTNAME;
+import static ru.ifmo.ctddev.isaev.networking.Main.PACKET_LENGTH;
 
 /**
  * @author Ilya Isaev
  */
 public class NormalBroadcaster extends Broadcaster {
     @Override
-    public DatagramPacket getBroadcastPacket() throws SocketException, UnknownHostException {
+    public byte[] getBroadcastPacket() throws SocketException, UnknownHostException {
         NetworkInterface network = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
         byte[] mac = network.getHardwareAddress();
         assert mac.length == 6;
         byte[] host = HOSTNAME.getBytes(StandardCharsets.UTF_8);
         ByteBuffer header = ByteBuffer.allocate(7 + host.length);
         header.order(ByteOrder.BIG_ENDIAN);
-        InetAddress broadCastAddress = getBroadcastAddress(network);
         header.put(mac);
         header.put((byte) host.length);
         header.put(host);
@@ -30,7 +33,6 @@ public class NormalBroadcaster extends Broadcaster {
         //toSend.putInt((int) (timestamp << 32 >> 32));
         //toSend.putInt((int) (timestamp >> 32));
         toSend.putLong(timestamp);
-        return new DatagramPacket(toSend.array(),
-                toSend.array().length, broadCastAddress, PORT);
+        return toSend.array();
     }
 }
